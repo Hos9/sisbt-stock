@@ -27,6 +27,7 @@ export default function Dashboard() {
     todayOut: 0
   })
   const [recent, setRecent] = useState([])
+  const [inStock, setInStock] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -67,6 +68,14 @@ export default function Dashboard() {
 
     setStats({ totalProducts, totalStockUnits, lowStock, outOfStock, todayIn, todayOut })
     setRecent(movements || [])
+
+    const { data: stocked } = await supabase
+      .from('products')
+      .select('id, sku, product_name, current_stock, minimum_stock, categories(category_name)')
+      .gt('current_stock', 0)
+      .order('current_stock', { ascending: false })
+    setInStock(stocked || [])
+
     setLoading(false)
   }
 
@@ -79,6 +88,42 @@ export default function Dashboard() {
         <StatCard label="Out of Stock" value={stats.outOfStock} tone="danger" />
         <StatCard label="Today's Stock IN" value={stats.todayIn} />
         <StatCard label="Today's Stock OUT" value={stats.todayOut} />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-surface-border bg-white shadow-card">
+        <div className="border-b border-surface-border px-5 py-4">
+          <h2 className="font-display text-base font-semibold text-ink-900">Products In Stock</h2>
+          <p className="text-xs text-ink-700/50">Products currently holding more than 0 units.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border text-left text-xs uppercase text-ink-700/50">
+                <th className="px-5 py-3 font-medium">Product</th>
+                <th className="px-5 py-3 font-medium">Category</th>
+                <th className="px-5 py-3 text-right font-medium">Current Stock</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && (
+                <tr><td colSpan={3} className="px-5 py-6 text-center text-ink-700/50">Loading…</td></tr>
+              )}
+              {!loading && inStock.length === 0 && (
+                <tr><td colSpan={3} className="px-5 py-6 text-center text-ink-700/50">No products currently in stock.</td></tr>
+              )}
+              {inStock.map((p) => (
+                <tr key={p.id} className="border-b border-surface-border last:border-0">
+                  <td className="px-5 py-3">
+                    <p className="font-medium text-ink-900">{p.product_name}</p>
+                    <p className="text-xs text-ink-700/50">{p.sku}</p>
+                  </td>
+                  <td className="px-5 py-3 text-ink-700/70">{p.categories?.category_name || '—'}</td>
+                  <td className="px-5 py-3 text-right font-medium">{p.current_stock}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="mt-6 rounded-2xl border border-surface-border bg-white shadow-card">

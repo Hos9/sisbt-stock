@@ -140,6 +140,15 @@ export default function Products() {
     loadAll()
   }
 
+  const handleToggleActive = async (p) => {
+    const { error } = await supabase.from('products').update({ is_active: !(p.is_active !== false) }).eq('id', p.id)
+    if (error) {
+      alert(error.message || 'Could not update product status.')
+      return
+    }
+    loadAll()
+  }
+
   const handleDelete = async (p) => {
     if (!window.confirm(`Delete "${p.product_name}"? This cannot be undone.`)) return
     const { error } = await supabase.from('products').delete().eq('id', p.id)
@@ -210,15 +219,16 @@ export default function Products() {
               <th className="px-4 py-3 font-medium">Unit</th>
               <th className="px-4 py-3 text-right font-medium">Stock</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Active</th>
               {isAdmin && <th className="px-4 py-3 font-medium">Actions</th>}
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-ink-700/50">Loading…</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-ink-700/50">Loading…</td></tr>
             )}
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-ink-700/50">No products found.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-ink-700/50">No products found.</td></tr>
             )}
             {filtered.map((p) => {
               const status = stockStatus(p)
@@ -244,6 +254,25 @@ export default function Products() {
                     >
                       {status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {isAdmin ? (
+                      <button
+                        onClick={() => handleToggleActive(p)}
+                        className={`focus-ring rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
+                          p.is_active !== false
+                            ? 'bg-signal-light text-signal-dark hover:bg-signal/20'
+                            : 'bg-surface-border text-ink-700/60 hover:bg-surface-border/70'
+                        }`}
+                        title="Click to toggle"
+                      >
+                        {p.is_active !== false ? 'Active' : 'Inactive'}
+                      </button>
+                    ) : (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.is_active !== false ? 'bg-signal-light text-signal-dark' : 'bg-surface-border text-ink-700/60'}`}>
+                        {p.is_active !== false ? 'Active' : 'Inactive'}
+                      </span>
+                    )}
                   </td>
                   {isAdmin && (
                     <td className="px-4 py-3">

@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { supabase } from '../lib/supabaseClient'
 import { exportToCsv } from '../lib/csv'
+import { useAuth } from '../context/AuthContext'
 
 const PAGE_SIZE = 15
 
 export default function StockMovement() {
+  const { isAdmin } = useAuth()
   const [movements, setMovements] = useState([])
   const [products, setProducts] = useState([])
   const [totalCount, setTotalCount] = useState(0)
@@ -25,13 +27,18 @@ export default function StockMovement() {
   useEffect(() => {
     loadMovements()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, productFilter, typeFilter, dateFrom, dateTo])
+  }, [page, productFilter, typeFilter, dateFrom, dateTo, isAdmin])
 
   const loadMovements = async () => {
     setLoading(true)
     let query = supabase
       .from('stock_movements')
-      .select('*, products(product_name, sku)', { count: 'exact' })
+      .select(
+        isAdmin
+          ? '*, products(product_name, sku), profiles(full_name)'
+          : '*, products(product_name, sku)',
+        { count: 'exact' }
+      )
       .order('created_at', { ascending: false })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
@@ -59,7 +66,7 @@ export default function StockMovement() {
   const handleExport = async () => {
     let query = supabase
       .from('stock_movements')
-      .select('*, products(product_name, sku)')
+      .select(isAdmin ? '*, products(product_name, sku), profiles(full_name)' : '*, products(product_name, sku)')
       .order('created_at', { ascending: false })
     if (productFilter) query = query.eq('product_id', productFilter)
     if (typeFilter) query = query.eq('movement_type', typeFilter)
@@ -77,7 +84,8 @@ export default function StockMovement() {
         'Previous Stock': m.previous_stock,
         'New Stock': m.new_stock,
         Reference: m.reference_number,
-        Notes: m.notes
+        Notes: m.notes,
+        ...(isAdmin ? { 'Posted By': m.profiles?.full_name || '—' } : {})
       }))
     )
   }
@@ -116,12 +124,13 @@ export default function StockMovement() {
               <th className="px-4 py-3 text-right font-medium">Qty</th>
               <th className="px-4 py-3 text-right font-medium">Prev → New</th>
               <th className="px-4 py-3 font-medium">Reference</th>
+              {isAdmin && <th className="px-4 py-3 font-medium">Posted By</th>}
               <th className="px-4 py-3 font-medium">Notes</th>
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={7} className="px-4 py-6 text-center text-ink-700/50">Loading…</td></tr>}
-            {!loading && filteredForSearch.length === 0 && <tr><td colSpan={7} className="px-4 py-6 text-center text-ink-700/50">No movements found.</td></tr>}
+            {loading && <tr><td colSpan={isAdmin ? 8 : 7} className="px-4 py-6 text-center text-ink-700/50">Loading…</td></tr>}
+            {!loading && filteredForSearch.length === 0 && <tr><td colSpan={isAdmin ? 8 : 7} className="px-4 py-6 text-center text-ink-700/50">No movements found.</td></tr>}
             {filteredForSearch.map((m) => (
               <tr key={m.id} className="border-b border-surface-border last:border-0">
                 <td className="px-4 py-3 text-ink-700/70">{new Date(m.created_at).toLocaleString()}</td>
@@ -137,6 +146,7 @@ export default function StockMovement() {
                 <td className="px-4 py-3 text-right font-medium">{m.quantity}</td>
                 <td className="px-4 py-3 text-right text-ink-700/70">{m.previous_stock} → {m.new_stock}</td>
                 <td className="px-4 py-3 text-ink-700/70">{m.reference_number || '—'}</td>
+                {isAdmin && <td className="px-4 py-3 text-ink-700/70">{m.profiles?.full_name || '—'}</td>}
                 <td className="px-4 py-3 text-ink-700/70">{m.notes || '—'}</td>
               </tr>
             ))}

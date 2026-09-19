@@ -1,4 +1,4 @@
-# NetStock — ISP Stock & Inventory Management
+# Bank Town PoP — Stock & Inventory Management
 
 A private, login-gated stock management web app for an ISP / network equipment
 store (ONUs, fiber cable, patch cords, splitters, etc.), built with **React +
@@ -6,7 +6,7 @@ Vite + Tailwind** on the frontend and **Supabase** (Postgres + Auth + Row
 Level Security) as the backend. No mock data — everything reads from and
 writes to your Supabase project.
 
-Branding: *Developed by Hos9 for Arham General Store* (footer, every
+Branding: _Developed by Hos9 for Arham General Store_ (footer, every
 authenticated page).
 
 ---
@@ -49,7 +49,7 @@ authenticated page).
 - **Stock changes** (`Stock In` / `Stock Out`) are performed only through two
   Postgres functions (`fn_stock_in`, `fn_stock_out`) that re-check
   `auth.uid()` themselves, enforce the no-negative-stock rule server-side,
-  and are the *only* way rows land in `stock_movements` — direct table
+  and are the _only_ way rows land in `stock_movements` — direct table
   writes to `stock_movements` are revoked entirely.
 - The **service_role key is never used in the frontend** — only the public
   anon key, which is safe to ship because RLS does the real enforcement.
@@ -65,7 +65,7 @@ authenticated page).
 2. Open **SQL Editor → New query**, paste the entire contents of
    [`supabase/schema.sql`](supabase/schema.sql), and run it. This creates all
    tables, indexes, RLS policies, and the stock-movement functions.
-3. *(Optional)* Run [`supabase/seed.sql`](supabase/seed.sql) the same way to
+3. _(Optional)_ Run [`supabase/seed.sql`](supabase/seed.sql) the same way to
    load sample ISP inventory (ONUs, fiber cable, patch cords, splitters,
    media converters, etc.) so you have something to click around with.
 4. Go to **Authentication → Users → Add user** and create your first login
