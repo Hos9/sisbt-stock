@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -10,7 +12,10 @@ body {
   @apply bg-surface-muted text-ink-900 font-body antialiased;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   @apply font-display;
 }
 
@@ -19,7 +24,7 @@ h1, h2, h3, h4 {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD3E1;
+  background: #cbd3e1;
   border-radius: 8px;
 }
 
@@ -32,5 +37,8 @@ h1, h2, h3, h4 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

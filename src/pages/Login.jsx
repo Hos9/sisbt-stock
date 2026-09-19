@@ -101,7 +101,7 @@ export default function Login() {
         </form>
 
         <p className="mt-6 text-center text-xs text-white/40">
-          Developed by Hos9 for Arham General Store
+          Developed by Hos9 for SIS | Bank Town PoP
         </p>
       </div>
     </div>
